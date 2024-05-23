@@ -1,6 +1,0 @@
-#backend, frontent, api42, 
-version: '3'
-
-service:
-  backend:
-    build: ./django

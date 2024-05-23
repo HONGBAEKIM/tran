@@ -1,0 +1,57 @@
+#database : PostgreSQL
+#backend : Django
+#frontent :
+#api42 : 
+
+version: '3.9'
+
+service:
+  database:
+    container_name : Postgre
+    build:
+    volumes:
+      - 
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - transcendance
+  
+  backend:
+    container_name : backend
+    build: ./django
+    volumes:
+      - 
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - transcendance
+  
+  frontend:
+    container_name : frontend
+    build:
+    volumes:
+      - 
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - transcendance
+
+  api:
+    container_name : api
+    build:
+    volumes:
+      - 
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - transcendance
+
+
+
+networks:
+  transcendance:
+    driver: bridge
