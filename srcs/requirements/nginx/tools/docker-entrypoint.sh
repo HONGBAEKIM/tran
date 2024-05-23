@@ -17,8 +17,8 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -keyout /etc/nginx/ssl/nginx.key \
         -out /etc/nginx/ssl/nginx.crt \
         -subj "/C=DE/L=berlin/O=berlin/CN=nginx" \
-        #silences all output from a command, both normal messages and error messages
         > /dev/null 2>&1
+#silences all output from a command, both normal messages and error messages
 
 
 # Execute nginx

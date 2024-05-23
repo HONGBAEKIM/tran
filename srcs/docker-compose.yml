@@ -3,8 +3,8 @@ version: '3.9'
 
 services:
   
-  ngnix:
-    container_name: ngnix
+  nginx:
+    container_name: nginx
     build:
       context: requirements/nginx
       dockerfile: Dockerfile
@@ -65,9 +65,9 @@ services:
 
 
 
-# networks:
-#   transcendance_network:
-#     driver: bridge
+networks:
+  transcendance_network:
+    driver: bridge
 
-# volumes:
-#   dist:
+volumes:
+  dist:
