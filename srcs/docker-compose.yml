@@ -1,57 +1,73 @@
-#database : PostgreSQL
-#backend : Django
-#frontent :
-#api42 : 
 
 version: '3.9'
 
-service:
-  database:
-    container_name : Postgre
-    build:
-    volumes:
-      - 
-    ports:
-      - "5432:5432"
-    restart: on-failure
-    networks:
-      - transcendance
+services:
   
-  backend:
-    container_name : backend
-    build: ./django
-    volumes:
-      - 
+  ngnix:
+    container_name: ngnix
+    build:
+      context: requirements/nginx
+      dockerfile: Dockerfile
+    env_file: 
+      - .env 
     ports:
-      - "5432:5432"
-    restart: on-failure
+      - "443:443"
     networks:
-      - transcendance
+      - transcendance_network
+    restart: on-failure
+    # depends_on:
+    #   - django
+    #   - frontend
+    volumes:
+      - dist:/var/www/html/dist/
+    
+#   django:
+#     container_name: django
+#     build:
+#       context: requirements/django
+#       dockerfile: Dockerfile
+#     env_file: 
+#       - .env 
+#     expose:
+#       - "443"
+#     networks:
+#       - transcendance_network
+#     restart: on-failure
+#     depends_on:
+#       - database
+#     volumes:
+#       - ./django:/django
+
+
+#   database:
+#     container_name : database
+#     env_file: 
+#       - .env  
+#     expose:
+#       - "5432"
+#     networks:
+#       - transcendance_network
+#     restart: on-failure
+#     volumes:
+#       - database:/var/lib/postgresql/data/
   
-  frontend:
-    container_name : frontend
-    build:
-    volumes:
-      - 
-    ports:
-      - "5432:5432"
-    restart: on-failure
-    networks:
-      - transcendance
-
-  api:
-    container_name : api
-    build:
-    volumes:
-      - 
-    ports:
-      - "5432:5432"
-    restart: on-failure
-    networks:
-      - transcendance
+  
+  
+#   frontend:
+#     container_name : frontend
+#     build:
+#       context: requirements/frontend
+#       dockerfile: Dockerfile
+#     volumes:
+#       - dist:/app/dist
+#       - ./frontend:/app
+#     restart: on-failure
 
 
 
-networks:
-  transcendance:
-    driver: bridge
+# networks:
+#   transcendance_network:
+#     driver: bridge
+
+# volumes:
+#   dist:

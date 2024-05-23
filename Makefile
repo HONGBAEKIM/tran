@@ -1,8 +1,6 @@
-
-COMPOSE		= /srcs/docker-compose.yml
+COMPOSE		= ./srcs/docker-compose.yml
 
 COMPOSE_CMD = docker-compose -f ${COMPOSE}
-
 
 build:
 	@${COMPOSE_CMD} up --build
