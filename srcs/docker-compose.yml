@@ -1,9 +1,9 @@
-
 version: '3.9'
 
 services:
   
   nginx:
+
     container_name: nginx
     build:
       context: requirements/nginx
@@ -14,56 +14,56 @@ services:
       - "443:443"
     networks:
       - transcendance_network
-    restart: on-failure
-    # depends_on:
-    #   - django
-    #   - frontend
+    restart: always
+    depends_on:
+      - django
+      - frontend
     volumes:
       - dist:/var/www/html/dist/
     
-#   django:
-#     container_name: django
-#     build:
-#       context: requirements/django
-#       dockerfile: Dockerfile
-#     env_file: 
-#       - .env 
-#     expose:
-#       - "443"
-#     networks:
-#       - transcendance_network
-#     restart: on-failure
-#     depends_on:
-#       - database
-#     volumes:
-#       - ./django:/django
+  frontend:
+    build:
+      context: requirements/frontend
+      dockerfile: Dockerfile
+
+    container_name: frontend
+    restart: always
+    volumes:
+      - dist:/app/dist
+      - ./frontend:/app
+
+  django:
+    image: django
+    container_name: django
+    build:
+      context: requirements/django
+      dockerfile: Dockerfile
+    env_file: 
+      - .env 
+    expose:
+      - "443"
+    networks:
+      - transcendance_network
+    restart: always # Restart containers on system boot and in case of failures
+    # pull_policy: never # Do not pull images from Docker hub, etc
+    depends_on:
+      - database
+    volumes:
+      - ./django:/django
 
 
-#   database:
-#     container_name : database
-#     env_file: 
-#       - .env  
-#     expose:
-#       - "5432"
-#     networks:
-#       - transcendance_network
-#     restart: on-failure
-#     volumes:
-#       - database:/var/lib/postgresql/data/
-  
-  
-  
-#   frontend:
-#     container_name : frontend
-#     build:
-#       context: requirements/frontend
-#       dockerfile: Dockerfile
-#     volumes:
-#       - dist:/app/dist
-#       - ./frontend:/app
-#     restart: on-failure
-
-
+  database:
+    image: postgres:latest
+    container_name : database
+    env_file: 
+      - .env  
+    expose:
+      - "5432"
+    networks:
+      - transcendance_network
+    restart: always
+    volumes:
+      - ./database:/var/lib/postgresql/data/
 
 networks:
   transcendance_network:
