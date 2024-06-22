@@ -1,28 +1,21 @@
 FROM debian:bullseye
 
-# Run package updates and install Nginx
-# openssl uses it for HTTPS
-# dumb-init is a simple process supervisor designed to run as PID 1 in minimal container environments.
+RUN apt update && \
+    apt upgrade -y nginx openssl dumb-init
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y nginx openssl dumb-init
-
-# Check if the directory /var/www/html/dist exists
-# -d stands for directory
-# 101:101 represents the user ID and group ID of the nginx user and group
-RUN [ -d /var/www/html/dist ] || mkdir -p /var/www/html/dist && \
-    chown -R 101:101 /var/www/html/dist && \ 
-    chmod -R 755 /var/www/html/dist
-
-
-COPY ./conf/default.conf /etc/nginx/conf.d/default.conf
-#COPY /tools/docker-entrypoint.sh /docker-entrypoint.sh
-COPY ./tools/docker-entrypoint.sh /docker-entrypoint.sh
-
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY tools/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-EXPOSE 443
+RUN mkdir -p /etc/nginx/ssl
+RUN openssl req -x509 -nodes -out /etc/nginx/ssl/nginx.crt -keyout /etc/nginx/ssl/nginx.key -subj "/C=DE/ST=BERLIN/L=Berlin/O=42/OU=42/CN=jubernar/UID=none"
+#RUN mkdir -p /usr/local/share/ca-certificates/
+# RUN cp /etc/nginx/ssl/nginx.crt /usr/local/share/ca-certificates/nginx.crt
+# RUN update-ca-certificates --fresh
+
+# RUN mkdir -p /var/run/nginx
+# RUN chmod 755 /var/www/html
+# RUN chown -R www-data:www-data /var/www/html
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["/docker-entrypoint.sh"]

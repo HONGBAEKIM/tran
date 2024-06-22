@@ -1,73 +1,93 @@
-
 version: '3.9'
 
 services:
-  
+
+  django:
+    container_name: django
+    build:
+      context: requirements/django
+      dockerfile: Dockerfile
+    env_file: 
+    - .env
+    networks:
+      - ts-network
+    expose:
+      - "8443"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - "postgresSQL"
+    volumes:
+      - django:/django-files
+    # restart: on-failure # always # Restart containers on system boot and in case of failures
+
+  postgresSQL:
+    container_name : postgresSQL
+    image: postgres:17beta1-bullseye
+    env_file:
+      - .env
+    networks:
+     - ts-network
+    expose:
+      - "5432"
+    restart: on-failure #always
+    volumes:
+      - database:/var/lib/postgresql/data/
+
   nginx:
     container_name: nginx
     build:
-      context: requirements/nginx
-      dockerfile: Dockerfile
+     context: requirements/nginx
+     dockerfile: Dockerfile
     env_file: 
       - .env 
-    ports:
-      - "443:443"
     networks:
-      - transcendance_network
-    restart: on-failure
-    # depends_on:
-    #   - django
-    #   - frontend
+       - ts-network
+    ports:
+      - "8443:443"   # For HTTPS
+    restart: on-failure #always
+    depends_on:
+      - django
     volumes:
       - dist:/var/www/html/dist/
-    
-#   django:
-#     container_name: django
-#     build:
-#       context: requirements/django
-#       dockerfile: Dockerfile
-#     env_file: 
-#       - .env 
-#     expose:
-#       - "443"
-#     networks:
-#       - transcendance_network
-#     restart: on-failure
-#     depends_on:
-#       - database
-#     volumes:
-#       - ./django:/django
-
-
-#   database:
-#     container_name : database
-#     env_file: 
-#       - .env  
-#     expose:
-#       - "5432"
-#     networks:
-#       - transcendance_network
-#     restart: on-failure
-#     volumes:
-#       - database:/var/lib/postgresql/data/
-  
-  
-  
-#   frontend:
-#     container_name : frontend
-#     build:
-#       context: requirements/frontend
-#       dockerfile: Dockerfile
-#     volumes:
-#       - dist:/app/dist
-#       - ./frontend:/app
-#     restart: on-failure
-
-
+      
+  frontend:
+    build: requirements/frontend
+    container_name: frontend
+    restart: always
+    volumes:
+      - dist:/usr/src/app/dist
+      - frontend:/app
 
 networks:
-  transcendance_network:
+  ts-network:
     driver: bridge
 
 volumes:
+  django:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '../M_django-data'
+  database:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '../M_database'
+  frontend:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '../M_frontend'
   dist:
+    # driver: local
+    # driver_opts:
+    #   type: 'none'
+    #   o: 'bind'
+    #   device: '../M_dist'
+
+
+
