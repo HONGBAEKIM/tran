@@ -26,8 +26,8 @@ build:
 down:
 	@${COMPOSE_CMD} down
 
-rm_volume:
-	-docker volume ls -q | xargs docker volume rm
+# rm_volume:
+# -docker volume ls -q | xargs docker volume rm
 
 clean:
 	@echo "clean"
@@ -38,13 +38,14 @@ clean:
 	-docker network ls -q | xargs docker network rm 2>/dev/null
 
 fclean: clean
-	-chmod 777 $(DJANGO_DIR)
-	-rm -rf $(DJANGO_DIR)
-	docker run -it --rm -v database:/delete debian:latest bash -c "rm -rf /delete/*"
-	@$(MAKE) clean
-	-chmod 777 $(DATABASE_DIR)
-	-rm -rf $(DATABASE_DIR)
-	docker system prune -f
+# -chmod 777 $(DJANGO_DIR)
+# -rm -rf $(DJANGO_DIR)
+# docker run -it --rm -v database:/delete debian:latest bash -c "rm -rf /delete/*"
+#  @$(MAKE) clean
+# -chmod 777 $(DATABASE_DIR)
+# -rm -rf $(DATABASE_DIR)
+	-docker volume ls -q | xargs docker volume rm
+	-docker system prune -f
 
 re: clean all
 
