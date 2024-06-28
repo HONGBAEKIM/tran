@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'playpong.apps.PlaypongConfig',
     'crispy_bootstrap5',
     'crispy_forms',
+    'channels',
     'rest_framework'
 ]
 
