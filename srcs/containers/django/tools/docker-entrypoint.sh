@@ -9,20 +9,6 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -subj "/C=DE/L=Berlin/O=42Berlin/CN=nginx" \
         > /dev/null 2>&1
 
-
-
-
-# if [ ! -f "/etc/daphne/ssl/daphne.crt" ] || [ ! -f "/etc/daphne/ssl/daphne.key" ]; then
-#     echo "Generating openssl certificate..."
-#     mkdir -p /etc/daphne/ssl
-#     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-#             -keyout /etc/daphne/ssl/daphne.key \
-#             -out /etc/daphne/ssl/daphne.crt \
-#             -subj "/C=DE/L=Berlin/O=42Berlin/CN=nginx" \
-#             > /dev/null 2>&1
-#     echo "Generated openssl certificate."
-# fi
-
 echo "Waiting for database to be ready..."
 retries=5
 # Uses nc (netcat) to check 
@@ -41,19 +27,14 @@ echo "Database is ready!"
 
 # Always run collectstatic
 echo "Collecting static files..."
-python3 manage.py collectstatic --noinput
-#sudo -E python3 manage.py collectstatic --noinput
+sudo -E python3 manage.py collectstatic --noinput
 
 if [ "$DJANGO_INITIAL_SETUP" = "true" ]; then
-	python3 manage.py makemigrations
+	#python3 manage.py makemigrations
 	python3 manage.py migrate
-	python3 manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
+	#python3 manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
 fi
 
-# Start Gunicorn server
-# exec gunicorn pong.wsgi:application --bind 0.0.0.0:8000
-#exec daphne pong.wsgi:application --bind 0.0.0.0
-
-exec daphne -b 0.0.0.0 -e ssl:8443:privateKey=/tmp/daphne/ssl/daphne.key:certKey=/tmp/daphne/ssl/daphne.crt pong.asgi:application
-
-# my ip 10.15.7.5
+# Daphne is a WebSocket server
+# used with Django Channels to handle WebSocket connections in Django applications.
+exec daphne -b 0.0.0.0 -e ssl:8443:privateKey=/tmp/daphne/ssl/daphne.key:certKey=/tmp/daphne/ssl/daphne.crt mywebsite.asgi:application

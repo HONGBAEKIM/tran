@@ -12,13 +12,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import json
 import django
 from django.utils.encoding import force_str
 django.utils.encoding.force_text = force_str
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -27,31 +27,45 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-DEBUG = False
+#DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
-import urllib.parse
-parsed_url = urllib.parse.urlparse(os.environ.get("MAIN_URL"))
-host_ip = parsed_url.hostname
-ALLOWED_HOSTS = ["nginx", host_ip]
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(" ")
+
 
 # Application definition
-
 INSTALLED_APPS = [
     'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'playpong'
+    'playpong',
+    'rest_framework',
+    'crispy_bootstrap5',
+    'crispy_forms'
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': os.getenv('CHANNEL_LAYERS_BACKEND', 'channels_redis.core.RedisChannelLayer'),
+        'CONFIG': {
+            "hosts": json.loads(os.getenv('CHANNEL_LAYERS_CONFIG_HOSTS', '[["redis", 6379]]')),
+        },
+    },
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line for WhiteNoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,7 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'pong.urls'
+ROOT_URLCONF = 'mywebsite.urls'
 
 TEMPLATES = [
     {
@@ -78,8 +92,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'pong.wsgi.application'
-
+WSGI_APPLICATION = 'mywebsite.wsgi.application'
+# Add Channels ASGI routing
+ASGI_APPLICATION = 'mywebsite.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -89,7 +104,7 @@ DATABASES = {
         'ENGINE': 'django_postgres_extensions.backends.postgresql',
         'NAME': 'demo',
         'USER': 'demo',
-        'HOST': 'postgresSQL',
+        'HOST': 'postgressql',
         'PORT': 5432,
         'PASSWORD':'demo'
     }
@@ -130,8 +145,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-# STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type
@@ -139,6 +159,14 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+
+LOGIN_REDIRECT_URL = '/pong'
+LOGOUT_REDIRECT_URL = '/login'
+
+# Cross-Site Request Forgery (CSRF) protection mechanism has blocked a request, so it just opend 
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost',
+    'https://127.0.0.1',
+    'https://127.0.0.1:8443',
+    'https://10.15.203.3:8443'
+]

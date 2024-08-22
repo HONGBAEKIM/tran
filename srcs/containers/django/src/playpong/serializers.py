@@ -1,7 +1,11 @@
-from rest_framework import serializers
-from .models import Game
+# to define how the data should be transformed to 
+# and from various formats, such as JSON or XML. 
 
-class GameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Game
-        fields = '__all__'  # Serialize all fields in the Game model
+# It is a crucial component for handling the input and output of API endpoints.
+
+from rest_framework import serializers
+
+class PlayerSerializer(serializers.Serializer):
+    y = serializers.IntegerField()
+    dy = serializers.IntegerField()
+    score = serializers.IntegerField()
